@@ -9,10 +9,10 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'RentTracker'
+BOT_NAME = 'RentTrackers'
 
-SPIDER_MODULES = ['RentTracker.spiders']
-NEWSPIDER_MODULE = 'RentTracker.spiders'
+SPIDER_MODULES = ['RentTrackers.spiders']
+NEWSPIDER_MODULE = 'RentTrackers.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
