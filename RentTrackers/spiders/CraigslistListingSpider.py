@@ -2,18 +2,31 @@ import os
 import re
 import scrapy
 
-sample_directory = "/home/vbarua/Dropbox/Projects/VTU/Samples/Craigslist/"
+#sample_directory = "/home/vbarua/Dropbox/Projects/VTU/Samples/Craigslist/"
+sample_directory = "/output/Samples/Craigslist/"
+
 
 def extract_area(s):
-    "Extract area from string like: '1br 1ba 600'. Last number is area."
+    """
+    Extract area from string like: '1br 1ba 600'. Last number is area.
+    
+    :param s: 
+    :return: 
+    """
     match = re.search(r'\d+$', s)
     if match:
         return match.group()
     else:
         return ""
 
+
 def extract_bedrooms(s):
-    "Extract # of bathrooms from a string like: '1br 1ba 600'"
+    """
+    Extract # of bathrooms from a string like: '1br 1ba 600'
+    
+    :param s: 
+    :return: 
+    """
     match = re.search(r'\d+br', s)
     if match:
         bedrooms = match.group()[:-2]
@@ -21,8 +34,14 @@ def extract_bedrooms(s):
     else:
         return ""
 
+
 def extract_bathrooms(s):
-    "Extract # of bedrooms from a string like: '1br 1ba 600'"
+    """
+    Extract # of bedrooms from a string like: '1br 1ba 600'
+    
+    :param s: 
+    :return: 
+    """
     match = re.search(r'\d+ba', s)
     if match:
         bathrooms= match.group()[:-2]
@@ -32,6 +51,9 @@ def extract_bathrooms(s):
 
 
 class CraigslistListingSpider(scrapy.Spider):
+    """
+    
+    """
     name = "Craigslist"
 
     def start_requests(self):
@@ -41,6 +63,11 @@ class CraigslistListingSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def _extract_address(self, response):
+        """
+        
+        :param response: 
+        :return: 
+        """
         address_option = response.css("span.postingtitletext small::text").extract_first()
         # Address are formatted as " (ADDRESS)"
         if address_option is None:
@@ -49,6 +76,11 @@ class CraigslistListingSpider(scrapy.Spider):
             return address_option.lstrip(" (").rstrip(' )')
 
     def _extract_bdrs_bths_area(self, response):
+        """
+        
+        :param response: 
+        :return: 
+        """
         raw_bdrs_bths_area = response.css("p.attrgroup span.shared-line-bubble b::text").extract()
         bdrs_bths_area = " ".join(raw_bdrs_bths_area).lower()
 
@@ -58,18 +90,38 @@ class CraigslistListingSpider(scrapy.Spider):
         return(num_bedrooms, num_bathrooms, area)
 
     def _extract_housing_type(self, attributes):
-        "Return the type of housing if available."
+        """
+        Return the type of housing if available.
+        
+        :param attributes: 
+        :return: 
+        """
         return "TODO"
 
     def _extract_laundry_type(self, attributes):
-        "Return the type of laundry."
+        """
+        Return the type of laundry.
+        
+        :param attributes: 
+        :return: 
+        """
         return "TODO"
 
     def _extract_parking_type(self, attributes):
-        "Return the type of parking if available."
+        """
+        Return the type of parking if available.
+        
+        :param attributes: 
+        :return: 
+        """
         return "TODO"
 
     def parse(self, response):
+        """
+        
+        :param response: 
+        :return: 
+        """
         post_link = response.css("link::attr(href)").extract_first()
         post_id = post_link.split("/")[-1]
         post_time = response.css("time::attr(datetime)").extract_first()

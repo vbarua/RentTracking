@@ -8,3 +8,6 @@ __pycache__/
 
 # IDE Settings
 .idea/
+
+# Ignore the Output of cached URLs and the JSON file
+output/*
