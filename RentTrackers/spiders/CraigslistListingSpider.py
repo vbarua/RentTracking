@@ -2,16 +2,15 @@ import os
 import re
 import scrapy
 
-#sample_directory = "/home/vbarua/Dropbox/Projects/VTU/Samples/Craigslist/"
-sample_directory = "/output/Samples/Craigslist/"
 
+log_tag = "!!! RentTracker.Craigslist"
 
 def extract_area(s):
     """
     Extract area from string like: '1br 1ba 600'. Last number is area.
     
-    :param s: 
-    :return: 
+    :param s: the string to parse
+    :return: an extraction of the square footage, if found, else `""`
     """
     match = re.search(r'\d+$', s)
     if match:
@@ -24,9 +23,9 @@ def extract_bedrooms(s):
     """
     Extract # of bathrooms from a string like: '1br 1ba 600'
     
-    :param s: 
-    :return: 
-    """
+    :param s: the string to parse
+    :return: an extraction of the number of bedrooms, if found, else `""`
+     """
     match = re.search(r'\d+br', s)
     if match:
         bedrooms = match.group()[:-2]
@@ -39,8 +38,8 @@ def extract_bathrooms(s):
     """
     Extract # of bedrooms from a string like: '1br 1ba 600'
     
-    :param s: 
-    :return: 
+    :param s: the string to parse
+    :return: an extraction of the number of bathrooms, if found, else `""`
     """
     match = re.search(r'\d+ba', s)
     if match:
@@ -57,10 +56,36 @@ class CraigslistListingSpider(scrapy.Spider):
     name = "Craigslist"
 
     def start_requests(self):
-        samples = os.listdir(sample_directory)
-        urls = ["file://" + sample_directory + s for s in samples]
+        """
+        
+        :return: 
+        """
+
+        sample_dir = self.get_samples_directory()
+        print("{} -- Looking for sample posts in {}".format(log_tag, sample_dir))
+        samples = os.listdir(sample_dir)
+        urls = ["file://" + sample_dir + s for s in samples]
         for url in urls:
+            print("{} -- URL: ".format(log_tag, url))
             yield scrapy.Request(url=url, callback=self.parse)
+
+    def get_samples_directory(self):
+        """
+        Responsible for appending the OS's current working directory to
+        the defined sample directory
+        
+        :return: The proper path for the samples directory
+        """
+        cwd = os.getcwd()
+        print("{} -- CWD: {}".format(log_tag, cwd))
+
+        sample_directory = "RentTrackers/output/Craigslist/samples/"
+        print("{} -- SAMPLES: {}".format(log_tag, sample_directory))
+
+        joined_dir = os.path.join(cwd, sample_directory)
+        print("{} -- JOINED: {}".format(log_tag, joined_dir))
+
+        return joined_dir
 
     def _extract_address(self, response):
         """
