@@ -1,6 +1,7 @@
 
 
 class LoggerManager:
+    # TODO: from scrapy.utils.log import configure_logging
 
     @staticmethod
     def debug(tag, msg):

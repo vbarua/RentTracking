@@ -8,8 +8,6 @@ class SpiderManager:
 
         """
 
-        super().__init__()
-
 
 def get_spiders():
     """
