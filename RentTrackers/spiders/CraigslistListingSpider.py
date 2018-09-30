@@ -1,5 +1,6 @@
 import os
 import re
+import locale
 import scrapy
 
 from RentTrackers.managers.LoggerManager import LoggerManager as logger
@@ -51,17 +52,16 @@ def extract_bathrooms(s):
         return ""
 
 
-def get_samples_directory():
+def extract_price(response):
     """
-    Responsible for appending the OS's current working directory to
-    the defined sample directory
+    Extract price 
 
-    :return: The proper path for the samples directory
+    :param response: the web response to parse
+    :return: an extraction of the price (trimmed to an integer)
     """
-    cwd = os.getcwd()
-    # assume that we are running this from the root of the repo
-    sample_directory = "RentTrackers/output/Craigslist/samples/"
-    return os.path.join(cwd, sample_directory)
+    price = response.css('span.price::text').extract_first()
+    decimal_point_char = locale.localeconv()['decimal_point']
+    return re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
 
 
 def extract_address(response):
@@ -123,6 +123,19 @@ def extract_parking_type(attributes):
     return "TODO"
 
 
+def get_samples_directory():
+    """
+    Responsible for appending the OS's current working directory to
+    the defined sample directory
+
+    :return: The proper path for the samples directory
+    """
+    cwd = os.getcwd()
+    # assume that we are running this from the root of the repo
+    sample_directory = "RentTrackers/output/Craigslist/samples/"
+    return os.path.join(cwd, sample_directory)
+
+
 class CraigslistListingSpider(scrapy.Spider):
     """
     
@@ -157,7 +170,7 @@ class CraigslistListingSpider(scrapy.Spider):
         post_id = post_link.split("/")[-1]
         post_time = response.css("time::attr(datetime)").extract_first()
 
-        price = response.css('span.price::text').extract_first()
+        price = extract_price(response)
 
         latitude = response.css("#map::attr(data-latitude)").extract_first()
         longitude = response.css("#map::attr(data-longitude)").extract_first()
