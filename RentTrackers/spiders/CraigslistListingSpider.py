@@ -179,6 +179,7 @@ class CraigslistListingSpider(scrapy.Spider):
             "post_link": post_link,
             "post_id": post_id,
             "post_time": post_time,
+            "price": price,
             "address": address,
             "area": area,
             "bathrooms": "" if num_bathrooms is None else num_bathrooms,
