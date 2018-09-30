@@ -22,7 +22,7 @@ def extract_area(s):
     if match:
         return match.group()
     else:
-        return 0
+        return ""
 
 
 def extract_bedrooms(s):
@@ -37,7 +37,7 @@ def extract_bedrooms(s):
         bedrooms = match.group()[:-2]
         return bedrooms
     else:
-        return 0
+        return ""
 
 
 def extract_bathrooms(s):
@@ -52,7 +52,7 @@ def extract_bathrooms(s):
         bathrooms = match.group()[:-2]
         return bathrooms
     else:
-        return 0
+        return ""
 
 
 def extract_price(response):
