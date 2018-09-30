@@ -2,8 +2,9 @@ import os
 import re
 import scrapy
 
+from RentTrackers.managers.LoggerManager import LoggerManager
 
-log_tag = "!!! RentTracker.Craigslist"
+log_tag = "Craigslist"
 
 def extract_area(s):
     """
@@ -62,11 +63,11 @@ class CraigslistListingSpider(scrapy.Spider):
         """
 
         sample_dir = self.get_samples_directory()
-        print("{} -- Looking for sample posts in {}".format(log_tag, sample_dir))
+        LoggerManager.debug(log_tag, "Looking for sample posts in {}".format(sample_dir))
         samples = os.listdir(sample_dir)
         urls = ["file://" + sample_dir + s for s in samples]
         for url in urls:
-            print("{} -- URL: ".format(log_tag, url))
+            LoggerManager.debug(log_tag, "Sampling URL: {}".format(url))
             yield scrapy.Request(url=url, callback=self.parse)
 
     def get_samples_directory(self):
@@ -77,13 +78,13 @@ class CraigslistListingSpider(scrapy.Spider):
         :return: The proper path for the samples directory
         """
         cwd = os.getcwd()
-        print("{} -- CWD: {}".format(log_tag, cwd))
+        LoggerManager.debug(log_tag, "CWD: {}".format(cwd))
 
         sample_directory = "RentTrackers/output/Craigslist/samples/"
-        print("{} -- SAMPLES: {}".format(log_tag, sample_directory))
+        LoggerManager.debug(log_tag, "SAMPLES: {}".format(sample_directory))
 
         joined_dir = os.path.join(cwd, sample_directory)
-        print("{} -- JOINED: {}".format(log_tag, joined_dir))
+        LoggerManager.debug(log_tag, "JOINED: {}".format(joined_dir))
 
         return joined_dir
 
