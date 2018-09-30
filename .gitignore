@@ -5,3 +5,6 @@ __pycache__/
 
 # Scrapy stuff:
 .scrapy
+
+# Mac Stuff
+.DS_Store
