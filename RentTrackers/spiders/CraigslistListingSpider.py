@@ -2,9 +2,10 @@ import os
 import re
 import scrapy
 
-from RentTrackers.managers.LoggerManager import LoggerManager
+from RentTrackers.managers.LoggerManager import LoggerManager as logger
 
 log_tag = "Craigslist"
+
 
 def extract_area(s):
     """
@@ -44,7 +45,7 @@ def extract_bathrooms(s):
     """
     match = re.search(r'\d+ba', s)
     if match:
-        bathrooms= match.group()[:-2]
+        bathrooms = match.group()[:-2]
         return bathrooms
     else:
         return ""
@@ -63,11 +64,11 @@ class CraigslistListingSpider(scrapy.Spider):
         """
 
         sample_dir = self.get_samples_directory()
-        LoggerManager.debug(log_tag, "Looking for sample posts in {}".format(sample_dir))
+        logger.debug(__name__, "Looking for sample posts in {}".format(sample_dir))
         samples = os.listdir(sample_dir)
         urls = ["file://" + sample_dir + s for s in samples]
         for url in urls:
-            LoggerManager.debug(log_tag, "Sampling URL: {}".format(url))
+            logger.debug(__name__, "Sampling URL: {}".format(url))
             yield scrapy.Request(url=url, callback=self.parse)
 
     def get_samples_directory(self):
@@ -78,13 +79,13 @@ class CraigslistListingSpider(scrapy.Spider):
         :return: The proper path for the samples directory
         """
         cwd = os.getcwd()
-        LoggerManager.debug(log_tag, "CWD: {}".format(cwd))
+        logger.debug(__name__, "CWD: {}".format(cwd))
 
         sample_directory = "RentTrackers/output/Craigslist/samples/"
-        LoggerManager.debug(log_tag, "SAMPLES: {}".format(sample_directory))
+        logger.debug(__name__, "SAMPLES: {}".format(sample_directory))
 
         joined_dir = os.path.join(cwd, sample_directory)
-        LoggerManager.debug(log_tag, "JOINED: {}".format(joined_dir))
+        logger.debug(__name__, "JOINED: {}".format(joined_dir))
 
         return joined_dir
 
@@ -113,7 +114,7 @@ class CraigslistListingSpider(scrapy.Spider):
         area = extract_area(bdrs_bths_area)
         num_bathrooms = extract_bathrooms(bdrs_bths_area)
         num_bedrooms = extract_bedrooms(bdrs_bths_area)
-        return(num_bedrooms, num_bathrooms, area)
+        return num_bedrooms, num_bathrooms, area
 
     def _extract_housing_type(self, attributes):
         """
