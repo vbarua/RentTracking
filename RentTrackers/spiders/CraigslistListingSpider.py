@@ -179,7 +179,6 @@ class CraigslistListingSpider(scrapy.Spider):
         # LatLng
         latitude = response.css("#map::attr(data-latitude)").extract_first()
         longitude = response.css("#map::attr(data-longitude)").extract_first()
-        latlng = LatLng(latitude=latitude, longitude=longitude)
 
         # HouseInfo
         address = extract_address(response)
@@ -195,29 +194,31 @@ class CraigslistListingSpider(scrapy.Spider):
         parking_type = extract_parking_type(attributes)
         wheelchair_accessible = "wheelchair accessible" in attributes
 
-        house_unit = HouseUnit(
-            type="rental",
-            location=latlng,
-            address=address,
-            bedrooms=num_bedrooms,
-            bathrooms=num_bathrooms,
-            area=area,
-            parking_spots=parking_type,
-            smoking_allowed=no_smoking,
-            wheelchair_access=wheelchair_accessible,
-            laundry_onsite=laundry_type
-        )
-
-        rental = Rental(
-            url=post_link,
-            id=post_id,
-            # TODO: add post_time (post model?)
-            city="",
-            price=price,
-            house_unit=house_unit
-        )
-
-        #yield rental
+        # TODO: Use models
+        #latlng = LatLng(latitude=latitude, longitude=longitude)
+        # house_unit = HouseUnit(
+        #     type="rental",
+        #     location=latlng,
+        #     address=address,
+        #     bedrooms=num_bedrooms,
+        #     bathrooms=num_bathrooms,
+        #     area=area,
+        #     parking_spots=parking_type,
+        #     smoking_allowed=no_smoking,
+        #     wheelchair_access=wheelchair_accessible,
+        #     laundry_onsite=laundry_type
+        # )
+        #
+        # rental = Rental(
+        #     url=post_link,
+        #     id=post_id,
+        #     # TODO: add post_time (post model?)
+        #     city="",
+        #     price=price,
+        #     house_unit=house_unit
+        # )
+        #
+        # yield rental
 
         yield {
             "post_link": post_link,
