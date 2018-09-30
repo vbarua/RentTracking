@@ -51,6 +51,84 @@ def extract_bathrooms(s):
         return ""
 
 
+def get_samples_directory():
+    """
+    Responsible for appending the OS's current working directory to
+    the defined sample directory
+
+    :return: The proper path for the samples directory
+    """
+    cwd = os.getcwd()
+    logger.debug(__name__, "CWD: {}".format(cwd))
+
+    sample_directory = "RentTrackers/output/Craigslist/samples/"
+    logger.debug(__name__, "SAMPLES: {}".format(sample_directory))
+
+    joined_dir = os.path.join(cwd, sample_directory)
+    logger.debug(__name__, "JOINED: {}".format(joined_dir))
+
+    return joined_dir
+
+
+def extract_address(response):
+    """
+
+    :param response: 
+    :return: 
+    """
+    address_option = response.css("span.postingtitletext small::text").extract_first()
+    # Address are formatted as " (ADDRESS)"
+    if address_option is None:
+        return ""
+    else:
+        return address_option.lstrip(" (").rstrip(' )')
+
+
+def extract_bdrs_bths_area(response):
+    """
+
+    :param response: 
+    :return: 
+    """
+    raw_bdrs_bths_area = response.css("p.attrgroup span.shared-line-bubble b::text").extract()
+    bdrs_bths_area = " ".join(raw_bdrs_bths_area).lower()
+
+    area = extract_area(bdrs_bths_area)
+    num_bathrooms = extract_bathrooms(bdrs_bths_area)
+    num_bedrooms = extract_bedrooms(bdrs_bths_area)
+    return num_bedrooms, num_bathrooms, area
+
+
+def extract_housing_type(attributes):
+    """
+    Return the type of housing if available.
+
+    :param attributes: 
+    :return: 
+    """
+    return "TODO"
+
+
+def extract_laundry_type(attributes):
+    """
+    Return the type of laundry.
+
+    :param attributes: 
+    :return: 
+    """
+    return "TODO"
+
+
+def extract_parking_type(attributes):
+    """
+    Return the type of parking if available.
+
+    :param attributes: 
+    :return: 
+    """
+    return "TODO"
+
+
 class CraigslistListingSpider(scrapy.Spider):
     """
     
@@ -59,11 +137,13 @@ class CraigslistListingSpider(scrapy.Spider):
 
     def start_requests(self):
         """
+        Overridden method from scrapy.spiders.Spider
+        Generates a series of requests with which to crawl over and parse
         
-        :return: 
+        :return: iterable of scrapy.http.request.Request
         """
 
-        sample_dir = self.get_samples_directory()
+        sample_dir = get_samples_directory()
         logger.debug(__name__, "Looking for sample posts in {}".format(sample_dir))
         samples = os.listdir(sample_dir)
         urls = ["file://" + sample_dir + s for s in samples]
@@ -71,83 +151,13 @@ class CraigslistListingSpider(scrapy.Spider):
             logger.debug(__name__, "Sampling URL: {}".format(url))
             yield scrapy.Request(url=url, callback=self.parse)
 
-    def get_samples_directory(self):
-        """
-        Responsible for appending the OS's current working directory to
-        the defined sample directory
-        
-        :return: The proper path for the samples directory
-        """
-        cwd = os.getcwd()
-        logger.debug(__name__, "CWD: {}".format(cwd))
-
-        sample_directory = "RentTrackers/output/Craigslist/samples/"
-        logger.debug(__name__, "SAMPLES: {}".format(sample_directory))
-
-        joined_dir = os.path.join(cwd, sample_directory)
-        logger.debug(__name__, "JOINED: {}".format(joined_dir))
-
-        return joined_dir
-
-    def _extract_address(self, response):
-        """
-        
-        :param response: 
-        :return: 
-        """
-        address_option = response.css("span.postingtitletext small::text").extract_first()
-        # Address are formatted as " (ADDRESS)"
-        if address_option is None:
-            return ""
-        else:
-            return address_option.lstrip(" (").rstrip(' )')
-
-    def _extract_bdrs_bths_area(self, response):
-        """
-        
-        :param response: 
-        :return: 
-        """
-        raw_bdrs_bths_area = response.css("p.attrgroup span.shared-line-bubble b::text").extract()
-        bdrs_bths_area = " ".join(raw_bdrs_bths_area).lower()
-
-        area = extract_area(bdrs_bths_area)
-        num_bathrooms = extract_bathrooms(bdrs_bths_area)
-        num_bedrooms = extract_bedrooms(bdrs_bths_area)
-        return num_bedrooms, num_bathrooms, area
-
-    def _extract_housing_type(self, attributes):
-        """
-        Return the type of housing if available.
-        
-        :param attributes: 
-        :return: 
-        """
-        return "TODO"
-
-    def _extract_laundry_type(self, attributes):
-        """
-        Return the type of laundry.
-        
-        :param attributes: 
-        :return: 
-        """
-        return "TODO"
-
-    def _extract_parking_type(self, attributes):
-        """
-        Return the type of parking if available.
-        
-        :param attributes: 
-        :return: 
-        """
-        return "TODO"
-
     def parse(self, response):
         """
+        Overridden method from scrapy.spiders.Spider
+        Gets text response from web requests and is responsible for parsing and serializing them
         
-        :param response: 
-        :return: 
+        :param response: an instance of scrapy.http.response.Response 
+        :return: Dictionary of parsed results
         """
         post_link = response.css("link::attr(href)").extract_first()
         post_id = post_link.split("/")[-1]
