@@ -1,4 +1,4 @@
-from RentTrackers.models.HouseInfo import HouseUnit
+from RentTrackers.models.HouseUnit import HouseUnit
 
 
 class Rental:
@@ -16,5 +16,7 @@ class Rental:
         self.id = id
         self.city = city
         self.price = price
+        self.house_unit = house_unit
+
 
 

@@ -3,8 +3,8 @@ from RentTrackers.models import LatLng
 
 class HouseUnit:
 
-    def __init__(self, type: str, location: LatLng, address: str, bedrooms: int, bathrooms: int, area: int, parking_spots: int,
-                 smoking_allowed: bool, wheelchair_access: bool, laundry_onsite: bool):
+    def __init__(self, type: str, location: LatLng, address: str, bedrooms: int, bathrooms: int, area: int,
+                 parking_spots: int, smoking_allowed: bool, wheelchair_access: bool, laundry_onsite: bool):
         """
         
         :param type: the type of unit (Apartment, House, Boat) (String)
