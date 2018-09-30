@@ -4,6 +4,9 @@ import locale
 import scrapy
 
 from RentTrackers.managers.LoggerManager import LoggerManager as logger
+from RentTrackers.models.HouseUnit import HouseUnit
+from RentTrackers.models.LatLng import LatLng
+from RentTrackers.models.Rental import Rental
 
 log_tag = "Craigslist"
 
@@ -13,13 +16,13 @@ def extract_area(s):
     Extract area from string like: '1br 1ba 600'. Last number is area.
     
     :param s: the string to parse
-    :return: an extraction of the square footage, if found, else `""`
+    :return: an extraction of the square footage, if found
     """
     match = re.search(r'\d+$', s)
     if match:
         return match.group()
     else:
-        return ""
+        return 0
 
 
 def extract_bedrooms(s):
@@ -27,14 +30,14 @@ def extract_bedrooms(s):
     Extract # of bathrooms from a string like: '1br 1ba 600'
     
     :param s: the string to parse
-    :return: an extraction of the number of bedrooms, if found, else `""`
+    :return: an extraction of the number of bedrooms, if found
      """
     match = re.search(r'\d+br', s)
     if match:
         bedrooms = match.group()[:-2]
         return bedrooms
     else:
-        return ""
+        return 0
 
 
 def extract_bathrooms(s):
@@ -42,14 +45,14 @@ def extract_bathrooms(s):
     Extract # of bedrooms from a string like: '1br 1ba 600'
     
     :param s: the string to parse
-    :return: an extraction of the number of bathrooms, if found, else `""`
+    :return: an extraction of the number of bathrooms, if found
     """
     match = re.search(r'\d+ba', s)
     if match:
         bathrooms = match.group()[:-2]
         return bathrooms
     else:
-        return ""
+        return 0
 
 
 def extract_price(response):
@@ -90,7 +93,7 @@ def extract_bdrs_bths_area(response):
     area = extract_area(bdrs_bths_area)
     num_bathrooms = extract_bathrooms(bdrs_bths_area)
     num_bedrooms = extract_bedrooms(bdrs_bths_area)
-    return num_bedrooms, num_bathrooms, area
+    return (num_bedrooms, num_bathrooms, area)
 
 
 def extract_housing_type(attributes):
@@ -110,7 +113,7 @@ def extract_laundry_type(attributes):
     :param attributes: 
     :return: 
     """
-    return "TODO"
+    return False
 
 
 def extract_parking_type(attributes):
@@ -120,7 +123,7 @@ def extract_parking_type(attributes):
     :param attributes: 
     :return: 
     """
-    return "TODO"
+    return 0
 
 
 def get_samples_directory():
@@ -166,15 +169,19 @@ class CraigslistListingSpider(scrapy.Spider):
         :param response: an instance of scrapy.http.response.Response 
         :return: Dictionary of parsed results
         """
+
+        # Rental
         post_link = response.css("link::attr(href)").extract_first()
         post_id = post_link.split("/")[-1]
         post_time = response.css("time::attr(datetime)").extract_first()
-
         price = extract_price(response)
 
+        # LatLng
         latitude = response.css("#map::attr(data-latitude)").extract_first()
         longitude = response.css("#map::attr(data-longitude)").extract_first()
+        latlng = LatLng(latitude=latitude, longitude=longitude)
 
+        # HouseInfo
         address = extract_address(response)
         (num_bedrooms, num_bathrooms, area) = extract_bdrs_bths_area(response)
 
@@ -187,6 +194,30 @@ class CraigslistListingSpider(scrapy.Spider):
         no_smoking = "no smoking" in attributes
         parking_type = extract_parking_type(attributes)
         wheelchair_accessible = "wheelchair accessible" in attributes
+
+        house_unit = HouseUnit(
+            type="rental",
+            location=latlng,
+            address=address,
+            bedrooms=num_bedrooms,
+            bathrooms=num_bathrooms,
+            area=area,
+            parking_spots=parking_type,
+            smoking_allowed=no_smoking,
+            wheelchair_access=wheelchair_accessible,
+            laundry_onsite=laundry_type
+        )
+
+        rental = Rental(
+            url=post_link,
+            id=post_id,
+            # TODO: add post_time (post model?)
+            city="",
+            price=price,
+            house_unit=house_unit
+        )
+
+        #yield rental
 
         yield {
             "post_link": post_link,
