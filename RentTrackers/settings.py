@@ -47,13 +47,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'RentTracker.middlewares.RenttrackerSpiderMiddleware': 543,
+#    'RentTrackers.middlewares.RentTrackerSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'RentTracker.middlewares.RenttrackerDownloaderMiddleware': 543,
+#    'RentTrackers.middlewares.RentTrackerDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'RentTracker.pipelines.RenttrackerPipeline': 300,
+#    'RentTrackers.pipelines.RentTrackerPipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
