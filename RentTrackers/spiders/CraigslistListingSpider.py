@@ -59,15 +59,9 @@ def get_samples_directory():
     :return: The proper path for the samples directory
     """
     cwd = os.getcwd()
-    logger.debug(__name__, "CWD: {}".format(cwd))
-
+    # assume that we are running this from the root of the repo
     sample_directory = "RentTrackers/output/Craigslist/samples/"
-    logger.debug(__name__, "SAMPLES: {}".format(sample_directory))
-
-    joined_dir = os.path.join(cwd, sample_directory)
-    logger.debug(__name__, "JOINED: {}".format(joined_dir))
-
-    return joined_dir
+    return os.path.join(cwd, sample_directory)
 
 
 def extract_address(response):
@@ -168,17 +162,17 @@ class CraigslistListingSpider(scrapy.Spider):
         latitude = response.css("#map::attr(data-latitude)").extract_first()
         longitude = response.css("#map::attr(data-longitude)").extract_first()
 
-        address = self._extract_address(response)
-        (num_bedrooms, num_bathrooms, area) = self._extract_bdrs_bths_area(response)
+        address = extract_address(response)
+        (num_bedrooms, num_bathrooms, area) = extract_bdrs_bths_area(response)
 
         attributes = " ".join(response.css("p.attrgroup span::text").extract()).lower()
         cats_allowed = "cats are ok" in attributes
         dogs_allowed = "dogs are ok" in attributes
         is_furnished = "TODO"
-        laundry_type = self._extract_laundry_type(attributes)
-        housing_type = self._extract_housing_type(attributes)
+        laundry_type = extract_laundry_type(attributes)
+        housing_type = extract_housing_type(attributes)
         no_smoking = "no smoking" in attributes
-        parking_type = self._extract_parking_type(attributes)
+        parking_type = extract_parking_type(attributes)
         wheelchair_accessible = "wheelchair accessible" in attributes
 
         yield {
