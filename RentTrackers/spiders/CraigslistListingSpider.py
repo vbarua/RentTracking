@@ -1,6 +1,8 @@
 import os
 import scrapy
+from scrapy import signals
 
+from RentTrackers.spiders.JsonCache import JsonCache
 from RentTrackers.managers.LoggerManager import LoggerManager as logger
 import RentTrackers.spiders.CraigslistParsingUtilities as cpu
 
@@ -27,12 +29,33 @@ class CraigslistListingSpider(scrapy.Spider):
     name = "Craigslist"
 
     city = "vancouver" # TODO: Make Configurable
+    post_id_cache_location = "output/post_cache.txt"
     base_search_url = "https://" + city + ".craigslist.ca/d/apts-housing-for-rent/search/apa"
 
     listing_cookies = {
         "cl_def_hp": city,
         "cl_tocmod": "sss:list,bbb:list,hhh:list"
     }
+
+    def __init__(self):
+        super().__init__()
+        self.post_id_cache = JsonCache(self.post_id_cache_location)
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        """
+        Attaching the spider_closed method to the spider_closed signal.
+        """
+        spider = super(CraigslistListingSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider):
+        """
+        Operations to perform once the spider terminates.
+        """
+        logger.info(__name__, "Writing Post ID Cache")
+        self.post_id_cache.write_cache()
 
     def start_requests(self):
         """
@@ -77,10 +100,12 @@ class CraigslistListingSpider(scrapy.Spider):
         results = response.css("li.result-row")
         for r in results:
             url = r.css("a.result-title::attr(href)").extract_first()
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_listing_page
-            )
+            post_id = int(r.css("li.result-row::attr(data-pid)").extract_first())
+            if self.post_id_cache.does_not_contain(post_id):
+                yield scrapy.Request(
+                    url=url,
+                    callback=self.parse_listing_page
+                )
 
     def parse_listing_page(self, response):
         """
@@ -92,7 +117,7 @@ class CraigslistListingSpider(scrapy.Spider):
 
         # Rental
         post_link = response.css("link::attr(href)").extract_first()
-        post_id = post_link.split("/")[-1]
+        post_id = post_link.split("/")[-1][:-5]
         post_time = response.css("time::attr(datetime)").extract_first()
         price = cpu.extract_price(response)
 
@@ -140,6 +165,7 @@ class CraigslistListingSpider(scrapy.Spider):
         #
         # yield rental
 
+        self.post_id_cache.add(post_id)
         yield {
             "post_link": post_link,
             "post_id": post_id,
