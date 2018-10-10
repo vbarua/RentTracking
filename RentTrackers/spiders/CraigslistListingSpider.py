@@ -145,6 +145,14 @@ class CraigslistListingSpider(scrapy.Spider):
     """
     name = "Craigslist"
 
+    city = "vancouver" # TODO: Make Configurable
+    base_search_url = "https://" + city + ".craigslist.ca/d/apts-housing-for-rent/search/apa"
+
+    listing_cookies = {
+        "cl_def_hp": city,
+        "cl_tocmod": "sss:list,bbb:list,hhh:list"
+    }
+
     def start_requests(self):
         """
         Overridden method from scrapy.spiders.Spider
@@ -153,20 +161,51 @@ class CraigslistListingSpider(scrapy.Spider):
         :return: iterable of scrapy.http.request.Request
         """
 
-        sample_dir = get_samples_directory()
-        logger.debug(__name__, "Looking for sample posts in {}".format(sample_dir))
-        samples = os.listdir(sample_dir)
-        urls = ["file://" + sample_dir + s for s in samples]
-        for url in urls:
-            logger.debug(__name__, "Sampling URL: {}".format(url))
-            yield scrapy.Request(url=url, callback=self.parse)
+        use_samples = False # TODO: Set from command line for easy testing.
+        if use_samples:
+            sample_dir = get_samples_directory()
+            logger.info(__name__, "Using Sample Listings In: {}".format(sample_dir))
+            samples = os.listdir(sample_dir)
+            urls = ["file://" + sample_dir + s for s in samples]
+            for url in urls:
+                yield scrapy.Request(
+                    url=url,
+                    callback=self.parse_listing_page,
+                    cookies=self.listing_cookies
+                )
+        else:
+            url = self.base_search_url
+            logger.info(__name__, "Starting Craigslist Crawl")
+            yield scrapy.Request(
+                url=url,
+                callback=self.parse_search_page,
+                cookies=self.listing_cookies
+            )
 
     def parse(self, response):
+        return {}
+
+    def parse_search_page(self, response):
         """
-        Overridden method from scrapy.spiders.Spider
-        Gets text response from web requests and is responsible for parsing and serializing them
-        
-        :param response: an instance of scrapy.http.response.Response 
+        Parses the contents of a Craigslist search page. Yields a series of Craislist list page Requests.
+        :param response: an instance of scrapy.http.response.Response
+        :return: Yields a series of scrapy.http.request.Request
+        """
+
+        # TODO: Crawl beyond first search result page
+        results = response.css("li.result-row")
+        for r in results:
+            url = r.css("a.result-title::attr(href)").extract_first()
+            yield scrapy.Request(
+                url=url,
+                callback=self.parse_listing_page
+            )
+
+    def parse_listing_page(self, response):
+        """
+        Parses the contents of a Craiglist listing page. Returns a dictionary of the contents.
+
+        :param response: an instance of scrapy.http.response.Response
         :return: Dictionary of parsed results
         """
 
