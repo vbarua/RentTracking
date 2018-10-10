@@ -5,9 +5,14 @@ Makes use of the  [Scrapy]( https://github.com/scrapy/scrapy) web crawling and s
 
 Please scrape responsibly.
 
-## Craigslist
-```scrapy crawl Craigslist -o output.json```
+## Scrapers
+
+### Craigslist
+```
+scrapy crawl Craigslist -o RentTrackers/output/Craigslist/results/output-craiglslist.json
+```
 This command runs the Craigslist scraper to extract rental data.
+The `RentTrackers/output` directory is ignored by version control
 
 ### TODO
 - Implement page caching to avoid making unnecessary requests to Craigslist.
