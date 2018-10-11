@@ -54,8 +54,11 @@ def extract_price(response):
     :return: an extraction of the price (trimmed to an integer)
     """
     price = response.css('span.price::text').extract_first()
-    decimal_point_char = locale.localeconv()['decimal_point']
-    return re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
+    if price:
+        decimal_point_char = locale.localeconv()['decimal_point']
+        return re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
+    else:
+        return ""
 
 
 def extract_address(response):
