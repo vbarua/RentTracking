@@ -105,15 +105,7 @@ class CraigslistListingSpider(scrapy.Spider):
         address = cpu.extract_address(response)
         (num_bedrooms, num_bathrooms, area) = cpu.extract_bdrs_bths_area(response)
 
-        attributes = " ".join(response.css("p.attrgroup span::text").extract()).lower()
-        cats_allowed = "cats are ok" in attributes
-        dogs_allowed = "dogs are ok" in attributes
-        is_furnished = "TODO"
-        laundry_type = cpu.extract_laundry_type(attributes)
-        housing_type = cpu.extract_housing_type(attributes)
-        no_smoking = "no smoking" in attributes
-        parking_type = cpu.extract_parking_type(attributes)
-        wheelchair_accessible = "wheelchair accessible" in attributes
+        unstructured_attributes = cpu.extract_unstructured_attributes(response)
 
         # TODO: Use models
         #latlng = LatLng(latitude=latitude, longitude=longitude)
@@ -141,8 +133,7 @@ class CraigslistListingSpider(scrapy.Spider):
         #
         # yield rental
 
-        self.post_id_cache.add(post_id)
-        yield {
+        base_results = {
             "post_link": post_link,
             "post_id": post_id,
             "post_time": post_time,
@@ -151,18 +142,13 @@ class CraigslistListingSpider(scrapy.Spider):
             "area": area,
             "bathrooms": "" if num_bathrooms is None else num_bathrooms,
             "bedrooms": "" if num_bedrooms is None else num_bedrooms,
-            "is_furnished": is_furnished,
-            "housing_type": housing_type,
-            "laundry": laundry_type,
             "location": {
                 "latitude": latitude,
                 "longitude": longitude
             },
-            "parking": parking_type,
-            "pets": {
-                "cats_allowed": cats_allowed,
-                "dogs_allowed": dogs_allowed
-            },
-            "no_smoking": no_smoking,
-            "wheelchair_accessible": wheelchair_accessible,
         }
+        base_results.update(unstructured_attributes)
+
+        self.post_id_cache.add(post_id)
+
+        yield base_results

@@ -87,34 +87,71 @@ def extract_bdrs_bths_area(response):
     area = extract_area(bdrs_bths_area)
     num_bathrooms = extract_bathrooms(bdrs_bths_area)
     num_bedrooms = extract_bedrooms(bdrs_bths_area)
-    return (num_bedrooms, num_bathrooms, area)
+    return num_bedrooms, num_bathrooms, area
 
 
-def extract_housing_type(attributes):
-    """
-    Return the type of housing if available.
+VALID_HOUSING_TYPES = {
+    "apartment",
+    "condo",
+    "cottage/cabin",
+    "duplex",
+    "flat",
+    "house",
+    "in-law",
+    "loft",
+    "townhouse",
+    "manufactured",
+    "land",
+    "assisted living",
+}
 
-    :param attributes:
-    :return:
-    """
-    return "TODO"
+VALID_LAUNDRY_TYPES = {
+    "w/d in unit",
+    "w/d hookups",
+    "laundry in bldg",
+    "laundry on site",
+    "no laundry on site",
+
+}
+
+VALID_PARKING_TYPES = {
+    "carport",
+    "attached garage",
+    "detached garage",
+    "off-street parking",
+    "street parking",
+    "valet parking",
+    "no parking",
+}
 
 
-def extract_laundry_type(attributes):
-    """
-    Return the type of laundry.
+def extract_unstructured_attributes(response):
+    attrs = response.css("p.attrgroup span::text").extract()
+    attrs = [a.lower() for a in attrs]
+    results = {}
+    for a in attrs:
+        if a in VALID_HOUSING_TYPES:
+            results["housing_type"] = a
+            break
+        if a in VALID_LAUNDRY_TYPES:
+            results["laundry_type"] = a
+            break
+        if a in VALID_PARKING_TYPES:
+            results["parking_type"] = a
+            break
+        if a is "no smoking":
+            results["is_no_smoking"] = True
+            break
+        if a is "wheelchair accessible":
+            results["is_wheelchair_accessible"] = True
+            break
+        if a is "furnished":
+            results["is_furnished"] = True
+            break
+        if a is "dogs are ok":
+            results["dogs_allowed"] = True
+            break
+        if a is "cats are ok":
+            results["cats_allowed"] = True
 
-    :param attributes:
-    :return:
-    """
-    return False
-
-
-def extract_parking_type(attributes):
-    """
-    Return the type of parking if available.
-
-    :param attributes:
-    :return:
-    """
-    return 0
+    return results
