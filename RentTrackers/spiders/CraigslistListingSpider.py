@@ -1,3 +1,4 @@
+import json
 import os
 import scrapy
 from scrapy import signals
@@ -18,7 +19,7 @@ def get_samples_directory():
     """
     cwd = os.getcwd()
     # assume that we are running this from the root of the repo
-    sample_directory = "RentTrackers/output/Craigslist/samples/"
+    sample_directory = "testing/samples/CraigslistListings/"
     return os.path.join(cwd, sample_directory)
 
 
@@ -26,19 +27,13 @@ class CraigslistListingSpider(scrapy.Spider):
     """
     
     """
-    name = "Craigslist"
+    name = "CraigslistListings"
 
-    city = "vancouver" # TODO: Make Configurable
     post_id_cache_location = "output/post_cache.txt"
-    base_search_url = "https://" + city + ".craigslist.ca/d/apts-housing-for-rent/search/apa"
-
-    listing_cookies = {
-        "cl_def_hp": city,
-        "cl_tocmod": "sss:list,bbb:list,hhh:list"
-    }
 
     def __init__(self):
         super().__init__()
+        self.crawl_list_location = os.environ["CRAWL_SET_LOCATION"]
         self.post_id_cache = JsonCache(self.post_id_cache_location)
 
     @classmethod
@@ -65,49 +60,30 @@ class CraigslistListingSpider(scrapy.Spider):
         :return: iterable of scrapy.http.request.Request
         """
 
-        use_samples = False # TODO: Set from command line for easy testing.
+        use_samples = os.environ.get("TEST")
         if use_samples:
             sample_dir = get_samples_directory()
-            logger.info(__name__, "Using Sample Listings In: {}".format(sample_dir))
             samples = os.listdir(sample_dir)
             urls = ["file://" + sample_dir + s for s in samples]
             for url in urls:
                 yield scrapy.Request(
                     url=url,
-                    callback=self.parse_listing_page,
-                    cookies=self.listing_cookies
+                    callback=self.parse,
                 )
         else:
-            url = self.base_search_url
+            with open(self.crawl_list_location, 'r') as f:
+                crawl_list = json.load(f)
+
             logger.info(__name__, "Starting Craigslist Crawl")
-            yield scrapy.Request(
-                url=url,
-                callback=self.parse_search_page,
-                cookies=self.listing_cookies
-            )
-
-    def parse(self, response):
-        return {}
-
-    def parse_search_page(self, response):
-        """
-        Parses the contents of a Craigslist search page. Yields a series of Craigslist list page Requests.
-        :param response: an instance of scrapy.http.response.Response
-        :return: Yields a series of scrapy.http.request.Request
-        """
-
-        # TODO: Crawl beyond first search result page
-        results = response.css("li.result-row")
-        for r in results:
-            url = r.css("a.result-title::attr(href)").extract_first()
-            post_id = int(r.css("li.result-row::attr(data-pid)").extract_first())
-            if self.post_id_cache.does_not_contain(post_id):
+            for i in crawl_list:
+                post_id = i["post_id"]
+                url = i["url"]
                 yield scrapy.Request(
                     url=url,
-                    callback=self.parse_listing_page
+                    callback=self.parse,
                 )
 
-    def parse_listing_page(self, response):
+    def parse(self, response):
         """
         Parses the contents of a Craiglist listing page. Returns a dictionary of the contents.
 
