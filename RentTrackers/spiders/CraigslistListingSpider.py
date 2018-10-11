@@ -95,17 +95,8 @@ class CraigslistListingSpider(scrapy.Spider):
         post_link = response.css("link::attr(href)").extract_first()
         post_id = post_link.split("/")[-1][:-5]
         post_time = response.css("time::attr(datetime)").extract_first()
-        price = cpu.extract_price(response)
 
-        # LatLng
-        latitude = response.css("#map::attr(data-latitude)").extract_first()
-        longitude = response.css("#map::attr(data-longitude)").extract_first()
-
-        # HouseInfo
-        address = cpu.extract_address(response)
-        (num_bedrooms, num_bathrooms, area) = cpu.extract_bdrs_bths_area(response)
-
-        unstructured_attributes = cpu.extract_unstructured_attributes(response)
+        results = cpu.extract_attributes(response)
 
         # TODO: Use models
         #latlng = LatLng(latitude=latitude, longitude=longitude)
@@ -137,17 +128,8 @@ class CraigslistListingSpider(scrapy.Spider):
             "post_link": post_link,
             "post_id": post_id,
             "post_time": post_time,
-            "price": price,
-            "address": address,
-            "area": area,
-            "bathrooms": "" if num_bathrooms is None else num_bathrooms,
-            "bedrooms": "" if num_bedrooms is None else num_bedrooms,
-            "location": {
-                "latitude": latitude,
-                "longitude": longitude
-            },
         }
-        base_results.update(unstructured_attributes)
+        base_results.update(results)
 
         self.post_id_cache.add(post_id)
 

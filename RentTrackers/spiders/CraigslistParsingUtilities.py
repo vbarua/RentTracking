@@ -11,12 +11,13 @@ def extract_area(s):
     """
     match = re.search(r'\d+$', s)
     if match:
-        return match.group()
+        area = match.group()
+        return {"area": area}
     else:
-        return ""
+        return {}
 
 
-def extract_bedrooms(s):
+def extract_bedrooms(s) -> dict:
     """
     Extract # of bathrooms from a string like: '1br 1ba 600'
 
@@ -26,27 +27,30 @@ def extract_bedrooms(s):
     match = re.search(r'\d+br', s)
     if match:
         bedrooms = match.group()[:-2]
-        return bedrooms
+        return {"bedrooms": bedrooms}
     else:
-        return ""
+        return {}
 
 
-def extract_bathrooms(s):
+def extract_bathrooms(s) -> dict:
     """
-    Extract # of bedrooms from a string like: '1br 1ba 600'
+    Extract # of bedrooms from a string like: '1br 1ba 600', '1br sharedba 400'
 
     :param s: the string to parse
     :return: an extraction of the number of bathrooms, if found
     """
-    match = re.search(r'\d+ba', s)
-    if match:
-        bathrooms = match.group()[:-2]
-        return bathrooms
-    else:
-        return ""
+    num_match = re.search(r'\d(\.\d)?ba', s)
+    if num_match:
+        bathrooms = num_match.group()[:-2]
+        return {"bathrooms": bathrooms}
+    type_match = re.search(r'[a-z]+ba', s)
+    if type_match:
+        bathrooms = type_match.group()[:-2]
+        return {"bathrooms": bathrooms}
+    return {}
 
 
-def extract_price(response):
+def extract_price(response) -> dict:
     """
     Extract price
 
@@ -56,12 +60,13 @@ def extract_price(response):
     price = response.css('span.price::text').extract_first()
     if price:
         decimal_point_char = locale.localeconv()['decimal_point']
-        return re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
+        formatted_price = re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
+        return {"price": formatted_price}
     else:
-        return ""
+        return {}
 
 
-def extract_address(response):
+def extract_address(response) -> dict:
     """
 
     :param response:
@@ -70,12 +75,13 @@ def extract_address(response):
     address_option = response.css("span.postingtitletext small::text").extract_first()
     # Address are formatted as " (ADDRESS)"
     if address_option is None:
-        return ""
+        return {}
     else:
-        return address_option.lstrip(" (").rstrip(' )')
+        clean_address = address_option.lstrip(" (").rstrip(' )')
+        return {"address": clean_address}
 
 
-def extract_bdrs_bths_area(response):
+def extract_bdrs_bths_area(response: dict):
     """
 
     :param response:
@@ -84,10 +90,30 @@ def extract_bdrs_bths_area(response):
     raw_bdrs_bths_area = response.css("p.attrgroup span.shared-line-bubble b::text").extract()
     bdrs_bths_area = " ".join(raw_bdrs_bths_area).lower()
 
-    area = extract_area(bdrs_bths_area)
-    num_bathrooms = extract_bathrooms(bdrs_bths_area)
-    num_bedrooms = extract_bedrooms(bdrs_bths_area)
-    return num_bedrooms, num_bathrooms, area
+    results = {}
+    results.update(extract_area(bdrs_bths_area))
+    results.update(extract_bathrooms(bdrs_bths_area))
+    results.update(extract_bedrooms(bdrs_bths_area))
+    return results
+
+
+def extract_lat_long(response) -> dict:
+    latitude = response.css("#map::attr(data-latitude)").extract_first()
+    longitude = response.css("#map::attr(data-longitude)").extract_first()
+    return {
+        "latitude": latitude,
+        "longitude": longitude
+    }
+
+
+def extract_attributes(response) -> dict:
+    results = {}
+    results.update(extract_price(response))
+    results.update(extract_address(response))
+    results.update(extract_lat_long(response))
+    results.update(extract_bdrs_bths_area(response))
+    results.update(extract_unstructured_attributes(response))
+    return results
 
 
 VALID_HOUSING_TYPES = {
