@@ -52,16 +52,15 @@ def extract_bathrooms(s) -> dict:
 
 def extract_price(response) -> dict:
     """
-    Extract price
+    Extract price from string like '$1000'. Prices are always integers but are not always present.
 
-    :param response: the web response to parse
-    :return: an extraction of the price (trimmed to an integer)
+    :param response: a scrapy.http.response.Response
+    :return: dictionary containing a price field if present.
     """
     price = response.css('span.price::text').extract_first()
     if price:
-        decimal_point_char = locale.localeconv()['decimal_point']
-        formatted_price = re.sub(r'[^0-9' + decimal_point_char + r']+', '', price)
-        return {"price": formatted_price}
+        price = int(price[1:])
+        return {"price": price}
     else:
         return {}
 
