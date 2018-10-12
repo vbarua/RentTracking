@@ -56,7 +56,7 @@ class CraigslistListingSpider(scrapy.Spider):
         """
         Overridden method from scrapy.spiders.Spider
         Generates a series of requests with which to crawl over and parse
-        
+
         :return: iterable of scrapy.http.request.Request
         """
 
@@ -78,7 +78,7 @@ class CraigslistListingSpider(scrapy.Spider):
             for i in crawl_list:
                 post_id = i["post_id"]
                 if self.post_id_cache.contains(post_id):
-                    break
+                    continue
 
                 url = i["url"]
                 yield scrapy.Request(

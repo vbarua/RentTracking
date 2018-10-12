@@ -167,25 +167,25 @@ def extract_unstructured_attributes(response) -> dict:
     for a in attrs:
         if a in VALID_HOUSING_TYPES:
             results["housing_type"] = a
-            break
+            continue
         if a in VALID_LAUNDRY_TYPES:
             results["laundry_type"] = a
-            break
+            continue
         if a in VALID_PARKING_TYPES:
             results["parking_type"] = a
-            break
+            continue
         if a is "no smoking":
             results["is_no_smoking"] = True
-            break
+            continue
         if a is "wheelchair accessible":
             results["is_wheelchair_accessible"] = True
-            break
+            continue
         if a is "furnished":
             results["is_furnished"] = True
-            break
+            continue
         if a is "dogs are ok":
             results["dogs_allowed"] = True
-            break
+            continue
         if a is "cats are ok":
             results["cats_allowed"] = True
 
