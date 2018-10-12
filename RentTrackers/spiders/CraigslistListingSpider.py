@@ -90,6 +90,9 @@ class CraigslistListingSpider(scrapy.Spider):
         :param response: an instance of scrapy.http.response.Response
         :return: Dictionary of parsed results
         """
+        is_deleted = response.css("div.removed")
+        if is_deleted:
+            return {}
 
         # Rental
         post_link = response.css("link::attr(href)").extract_first()
