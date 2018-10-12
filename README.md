@@ -5,15 +5,14 @@ Makes use of the  [Scrapy]( https://github.com/scrapy/scrapy) web crawling and s
 
 Please scrape responsibly.
 
+## Running
+- `run_crawl.sh`: Run a full crawl.
+- `test.sh`: Runs scrapers over sample data.
+
 ## Scrapers
 
 ### Craigslist
-```
-scrapy crawl Craigslist -o RentTrackers/output/Craigslist/results/output-craiglslist.json
-```
-This command runs the Craigslist scraper to extract rental data.
-The `RentTrackers/output` directory is ignored by version control
-
+Scraper output can be found in `output/<TIMESTAMP>/cl_output.json`
 #### Output Schema
 
 ```

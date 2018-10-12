@@ -10,7 +10,7 @@ __pycache__/
 .idea/
 
 # Ignore the Output of cached URLs and the JSON file
-RentTrackers/output/*
+output/*
 
 # Mac Stuff
 .DS_Store
