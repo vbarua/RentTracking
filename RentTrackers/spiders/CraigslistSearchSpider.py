@@ -2,7 +2,7 @@ import os
 import scrapy
 
 
-class CraisglistSearchSpider(scrapy.Spider):
+class CraigslistSearchSpider(scrapy.Spider):
     name = "CraigslistSearch"
 
     def __init__(self):
