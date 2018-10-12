@@ -77,6 +77,9 @@ class CraigslistListingSpider(scrapy.Spider):
             logger.info(__name__, "Starting Craigslist Crawl")
             for i in crawl_list:
                 post_id = i["post_id"]
+                if self.post_id_cache.contains(post_id):
+                    break
+
                 url = i["url"]
                 yield scrapy.Request(
                     url=url,
@@ -96,7 +99,7 @@ class CraigslistListingSpider(scrapy.Spider):
 
         # Rental
         post_link = response.css("link::attr(href)").extract_first()
-        post_id = post_link.split("/")[-1][:-5]
+        post_id = int(post_link.split("/")[-1][:-5])
         post_time = response.css("time::attr(datetime)").extract_first()
 
         results = cpu.extract_attributes(response)

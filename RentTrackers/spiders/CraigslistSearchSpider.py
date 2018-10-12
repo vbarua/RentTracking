@@ -32,6 +32,6 @@ class CraisglistSearchSpider(scrapy.Spider):
             repost_id = r.css("li.result-row::attr(data-repost-of)").extract_first()
             yield {
                 "post_id": post_id,
-                "repost_id": "" if repost_id is None else repost_id,
+                "repost_id": "" if repost_id is None else int(repost_id),
                 "url": url,
             }
