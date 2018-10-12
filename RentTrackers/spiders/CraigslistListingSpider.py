@@ -7,34 +7,33 @@ from RentTrackers.spiders.JsonCache import JsonCache
 from RentTrackers.managers.LoggerManager import LoggerManager as logger
 import RentTrackers.spiders.CraigslistParsingUtilities as cpu
 
-log_tag = "Craigslist"
 
-
-def get_samples_directory():
+def get_samples() -> list:
     """
-    Responsible for appending the OS's current working directory to
-    the defined sample directory
+    "Retrieve scraping samples from sample directory.
 
-    :return: The proper path for the samples directory
+    :return: List of file urls.
     """
     cwd = os.getcwd()
-    # assume that we are running this from the root of the repo
-    sample_directory = "testing/samples/CraigslistListings/"
-    return os.path.join(cwd, sample_directory)
+    # Assume that we are running this from the root of the repo
+    sample_dir = os.path.join(cwd, "testing/samples/CraigslistListings/")
+    samples = os.listdir(sample_dir)
+    urls = ["file://" + sample_dir + s for s in samples]
+    return urls
 
 
 class CraigslistListingSpider(scrapy.Spider):
-    """
-    
-    """
     name = "CraigslistListings"
-
-    post_id_cache_location = "output/post_cache.txt"
+    post_id_cache_location = "output/cl_post_id_cache.txt"
 
     def __init__(self):
         super().__init__()
-        self.crawl_list_location = os.environ["CRAWL_SET_LOCATION"]
+        self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
         self.post_id_cache = JsonCache(self.post_id_cache_location)
+        self.test_mode = False
+        if os.environ.get("TEST"):
+            self.test_mode = True
+
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -50,7 +49,8 @@ class CraigslistListingSpider(scrapy.Spider):
         Operations to perform once the spider terminates.
         """
         logger.info(__name__, "Writing Post ID Cache")
-        self.post_id_cache.write_cache()
+        if not self.test_mode:
+            self.post_id_cache.write_cache()
 
     def start_requests(self):
         """
@@ -59,19 +59,15 @@ class CraigslistListingSpider(scrapy.Spider):
 
         :return: iterable of scrapy.http.request.Request
         """
-
-        use_samples = os.environ.get("TEST")
-        if use_samples:
-            sample_dir = get_samples_directory()
-            samples = os.listdir(sample_dir)
-            urls = ["file://" + sample_dir + s for s in samples]
+        if self.test_mode:
+            urls = get_samples()
             for url in urls:
                 yield scrapy.Request(
                     url=url,
                     callback=self.parse,
                 )
         else:
-            with open(self.crawl_list_location, 'r') as f:
+            with open(self.crawl_set_location, 'r') as f:
                 crawl_list = json.load(f)
 
             logger.info(__name__, "Starting Craigslist Crawl")
@@ -88,7 +84,7 @@ class CraigslistListingSpider(scrapy.Spider):
 
     def parse(self, response):
         """
-        Parses the contents of a Craiglist listing page. Returns a dictionary of the contents.
+        Parses the contents of a Craigslist listing page. Returns a dictionary of the contents.
 
         :param response: an instance of scrapy.http.response.Response
         :return: Dictionary of parsed results
