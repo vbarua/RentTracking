@@ -10,11 +10,11 @@ class JsonCache:
         self.__load_cache__()
 
     def add(self, e):
-        self.cache[e] = 1
+        self.cache[e] = -1
 
     def contains(self, e):
         if e in self.cache:
-            self.cache[e] = 1
+            self.cache[e] = -1
             return True
         else:
             return False
@@ -22,10 +22,10 @@ class JsonCache:
     def __load_cache__(self):
         if os.path.isfile(self.path):
             with open(self.path, "r") as f:
-                post_ids = json.load(f)
-                self.cache = {int(pid) : 0 for pid in post_ids}
+                cache = json.load(f)
+                self.cache = {int(k): v for k, v in cache.items()}
 
     def write_cache(self):
-        filtered_dict = [pid for pid, v in self.cache.items() if v == 1]
+        new_cache = {post_id: n + 1 for post_id, n  in self.cache.items() if n < 4}
         with open(self.path, "w") as f:
-            json.dump(filtered_dict, f, indent=0)
+            json.dump(new_cache, f, indent=0)
