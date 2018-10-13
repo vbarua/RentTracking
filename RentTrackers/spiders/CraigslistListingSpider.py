@@ -3,7 +3,7 @@ import os
 import scrapy
 from scrapy import signals
 
-from RentTrackers.spiders.JsonCache import JsonCache
+from RentTrackers.spiders.IdCache import IdCache
 from RentTrackers.managers.LoggerManager import LoggerManager as logger
 import RentTrackers.spiders.CraigslistParsingUtilities as cpu
 
@@ -29,7 +29,7 @@ class CraigslistListingSpider(scrapy.Spider):
     def __init__(self):
         super().__init__()
         self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
-        self.post_id_cache = JsonCache(self.post_id_cache_location)
+        self.post_id_cache = IdCache(self.post_id_cache_location)
         self.test_mode = False
         if os.environ.get("TEST"):
             self.test_mode = True

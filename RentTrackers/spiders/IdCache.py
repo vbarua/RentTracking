@@ -2,7 +2,11 @@ import json
 import os
 
 
-class JsonCache:
+class IdCache:
+    """
+    Cache for storing ids that have been encountered during scraping.
+    Ids are dropped from the cache after they are not seen multiple times in a row.
+    """
 
     def __init__(self, path):
         self.path = path
