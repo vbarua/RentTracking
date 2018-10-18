@@ -30,6 +30,6 @@ class IdCache:
                 self.cache = {int(k): v for k, v in cache.items()}
 
     def write_cache(self):
-        new_cache = {post_id: n + 1 for post_id, n  in self.cache.items() if n < 4}
+        new_cache = {post_id: n + 1 for post_id, n  in self.cache.items() if n < 10}
         with open(self.path, "w") as f:
             json.dump(new_cache, f, indent=0)
