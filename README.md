@@ -24,6 +24,7 @@ The Option type indicates that a field may not be present in the output.
 {
     post_id:        Integer,
     post_time:      Timestamp,
+    update_time:    Optin[Timestamp],
     url:            String,
     latitude:       Option[String],
     longitude:      Option[String],

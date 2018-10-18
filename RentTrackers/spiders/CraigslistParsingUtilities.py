@@ -105,6 +105,19 @@ def extract_lat_long(response) -> dict:
     }
 
 
+def extract_update_time(response) -> dict:
+    """
+    Extracts post update time. May not be present.
+    :param response: a scrapy.http.response.Response
+    :return: dict containing an update_time field if present.
+    """
+    results = {}
+    update_time = response.xpath("//p[starts-with(text(), 'updated')]/time/@datetime").extract_first()
+    if update_time:
+        results["update_time"] = update_time
+    return results
+
+
 def extract_attributes(response) -> dict:
     """
     Extract attributes from a Craigslist listing.
@@ -116,6 +129,7 @@ def extract_attributes(response) -> dict:
     results.update(extract_address(response))
     results.update(extract_lat_long(response))
     results.update(extract_bdrs_bths_area(response))
+    results.update(extract_update_time(response))
     results.update(extract_unstructured_attributes(response))
     return results
 
