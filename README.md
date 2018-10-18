@@ -24,6 +24,7 @@ The Option type indicates that a field may not be present in the output.
 {
     post_id:        Integer,
     post_time:      Timestamp,
+    update_time:    Optin[Timestamp],
     url:            String,
     latitude:       Option[String],
     longitude:      Option[String],
@@ -49,9 +50,8 @@ The Option type indicates that a field may not be present in the output.
 ```
 
 ### TODO
-- Implement page caching to avoid making unnecessary requests to Craigslist.
-- Implement date cutoff to only scrape new postings.
-- Switch from crawling pages that have been saved locally to crawling the live Craigslist website.
+- Dockerize for portability.
+- Add additional data sources.
 
 ## Disclaimer
 This project is for non-commercial use.
