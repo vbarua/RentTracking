@@ -188,19 +188,20 @@ def extract_unstructured_attributes(response) -> dict:
         if a in VALID_PARKING_TYPES:
             results["parking_type"] = a
             continue
-        if a is "no smoking":
+        if a == "no smoking":
             results["is_no_smoking"] = True
             continue
-        if a is "wheelchair accessible":
+        if a == "wheelchair accessible":
             results["is_wheelchair_accessible"] = True
             continue
-        if a is "furnished":
+        if a == "furnished":
             results["is_furnished"] = True
             continue
-        if a is "dogs are ok":
+        if a == "dogs are ok - wooof":
             results["dogs_allowed"] = True
             continue
-        if a is "cats are ok":
+        if a == "cats are ok - purrr":
             results["cats_allowed"] = True
+            continue
 
     return results
