@@ -24,12 +24,13 @@ def get_samples() -> list:
 
 class CraigslistListingSpider(scrapy.Spider):
     name = "CraigslistListings"
-    post_id_cache_location = "output/cl_post_id_cache.txt"
 
     def __init__(self):
         super().__init__()
+        city = os.environ["CITY"]
+        post_id_cache_location = os.path.join("output", city, "cl_post_id_cache.txt")
         self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
-        self.post_id_cache = IdCache(self.post_id_cache_location)
+        self.post_id_cache = IdCache(post_id_cache_location)
         self.test_mode = False
         if os.environ.get("TEST"):
             self.test_mode = True
