@@ -4,7 +4,6 @@ import scrapy
 from scrapy import signals
 
 from RentTrackers.spiders.IdCache import IdCache
-from RentTrackers.managers.LoggerManager import LoggerManager as logger
 import RentTrackers.spiders.CraigslistParsingUtilities as cpu
 
 
@@ -51,7 +50,7 @@ class CraigslistListingSpider(scrapy.Spider):
         """
         Operations to perform once the spider terminates.
         """
-        logger.info(__name__, "Writing Post ID Cache")
+        self.logging.info("Writing Post ID Cache")
         if not self.test_mode:
             self.post_id_cache.write_cache()
 
@@ -73,7 +72,7 @@ class CraigslistListingSpider(scrapy.Spider):
             with open(self.crawl_set_location, 'r') as f:
                 crawl_list = json.load(f)
 
-            logger.info(__name__, "Starting Craigslist Crawl")
+            self.logging.info("Starting Craigslist Crawl")
             for i in crawl_list:
                 post_id = i["post_id"]
                 if self.post_id_cache.contains(post_id):
@@ -107,32 +106,6 @@ class CraigslistListingSpider(scrapy.Spider):
             f .write(body)
 
         results = cpu.extract_attributes(response)
-
-        # TODO: Use models
-        #latlng = LatLng(latitude=latitude, longitude=longitude)
-        # house_unit = HouseUnit(
-        #     type="rental",
-        #     location=latlng,
-        #     address=address,
-        #     bedrooms=num_bedrooms,
-        #     bathrooms=num_bathrooms,
-        #     area=area,
-        #     parking_spots=parking_type,
-        #     smoking_allowed=no_smoking,
-        #     wheelchair_access=wheelchair_accessible,
-        #     laundry_onsite=laundry_type
-        # )
-        #
-        # rental = Rental(
-        #     url=post_link,
-        #     id=post_id,
-        #     # TODO: add post_time (post model?)
-        #     city="",
-        #     price=price,
-        #     house_unit=house_unit
-        # )
-        #
-        # yield rental
 
         base_results = {
             "post_link": post_link,
