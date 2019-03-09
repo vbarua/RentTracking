@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-for city in vancouver
+for city in vancouver victoria kelowna
 do
+    echo Crawling ${city}
     export CITY=${city}
     NOW=`date +%Y/%m/%d/%H%M%S`
     OUTPUT_LOC=output/${CITY}/${NOW}
