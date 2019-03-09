@@ -28,6 +28,8 @@ class CraigslistListingSpider(scrapy.Spider):
     def __init__(self):
         super().__init__()
         city = os.environ["CITY"]
+        self.html_output_path = os.environ["CL_HTML_OUTPUT_LOCATION"]
+        os.makedirs(self.html_output_path)
         post_id_cache_location = os.path.join("output", city, "cl_post_id_cache.txt")
         self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
         self.post_id_cache = IdCache(post_id_cache_location)
@@ -90,6 +92,7 @@ class CraigslistListingSpider(scrapy.Spider):
         :param response: an instance of scrapy.http.response.Response
         :return: Dictionary of parsed results
         """
+
         is_deleted = response.css("div.removed")
         if is_deleted:
             return {}
@@ -98,6 +101,10 @@ class CraigslistListingSpider(scrapy.Spider):
         post_link = response.css("link::attr(href)").extract_first()
         post_id = int(post_link.split("/")[-1][:-5])
         post_time = response.css("time::attr(datetime)").extract_first()
+
+        body = response.text
+        with open(os.path.join(self.html_output_path, str(post_id) + ".html"), "w") as f:
+            f .write(body)
 
         results = cpu.extract_attributes(response)
 
