@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import scrapy
 from scrapy import signals
@@ -50,7 +51,7 @@ class CraigslistListingSpider(scrapy.Spider):
         """
         Operations to perform once the spider terminates.
         """
-        self.logging.info("Writing Post ID Cache")
+        logging.info("Writing Post ID Cache")
         if not self.test_mode:
             self.post_id_cache.write_cache()
 
@@ -72,7 +73,7 @@ class CraigslistListingSpider(scrapy.Spider):
             with open(self.crawl_set_location, 'r') as f:
                 crawl_list = json.load(f)
 
-            self.logging.info("Starting Craigslist Crawl")
+            logging.info("Starting Craigslist Crawl")
             for i in crawl_list:
                 post_id = i["post_id"]
                 if self.post_id_cache.contains(post_id):
