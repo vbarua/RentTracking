@@ -18,11 +18,11 @@ class CraigslistSearchSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        next_page =  response.xpath('//link[@rel="next"]/@href').extract_first()
+        next_page = response.xpath('//link[@rel="next"]/@href').extract_first()
         if next_page:
             yield scrapy.Request(
-                url = next_page,
-                callback = self.parse,
+                url=next_page,
+                callback=self.parse,
             )
 
         results = response.css("li.result-row")

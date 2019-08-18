@@ -5,7 +5,7 @@ import scrapy
 from scrapy import signals
 
 from RentTrackers.spiders.IdCache import IdCache
-import RentTrackers.spiders.CraigslistParsingUtilities as cpu
+import RentTrackers.spiders.CraigslistParsingUtilities as CPU
 
 
 def get_samples() -> list:
@@ -51,8 +51,8 @@ class CraigslistListingSpider(scrapy.Spider):
         """
         Operations to perform once the spider terminates.
         """
-        logging.info("Writing Post ID Cache")
         if not self.test_mode:
+            logging.info("Writing Post ID Cache")
             self.post_id_cache.write_cache()
 
     def start_requests(self):
@@ -106,7 +106,7 @@ class CraigslistListingSpider(scrapy.Spider):
         with open(os.path.join(self.html_output_path, str(post_id) + ".html"), "w") as f:
             f .write(body)
 
-        results = cpu.extract_attributes(response)
+        results = CPU.extract_attributes(response)
 
         base_results = {
             "post_link": post_link,
