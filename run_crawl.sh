@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+if test -f secrets ; then
+  source secrets
+fi
+
 for city in vancouver victoria kelowna
 do
     echo Crawling ${city}

@@ -4,6 +4,7 @@ import os
 import scrapy
 from scrapy import signals
 
+from .utils import send_email
 from RentTrackers.spiders.IdCache import IdCache
 import RentTrackers.spiders.CraigslistParsingUtilities as CPU
 
@@ -27,10 +28,11 @@ class CraigslistListingSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        city = os.environ["CITY"]
+        self.post_count = 0
+        self.city = os.environ["CITY"]
         self.html_output_path = os.environ["CL_HTML_OUTPUT_LOCATION"]
         os.makedirs(self.html_output_path)
-        post_id_cache_location = os.path.join("output", city, "cl_post_id_cache.txt")
+        post_id_cache_location = os.path.join("output", self.city, "cl_post_id_cache.txt")
         self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
         self.post_id_cache = IdCache(post_id_cache_location)
         self.test_mode = False
@@ -44,16 +46,24 @@ class CraigslistListingSpider(scrapy.Spider):
         Attaching the spider_closed method to the spider_closed signal.
         """
         spider = super(CraigslistListingSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.item_scraped, signal=signals.item_scraped)
         crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
         return spider
+
+    def item_scraped(self, item, spider):
+        self.post_count += 1
 
     def spider_closed(self, spider):
         """
         Operations to perform once the spider terminates.
         """
+        logging.info("ITEM COUNT: {0}".format(self.post_count))
         if not self.test_mode:
             logging.info("Writing Post ID Cache")
             self.post_id_cache.write_cache()
+            logging.info("Send Scrape Email")
+            send_email(self.city, self.post_count)
+
 
     def start_requests(self):
         """
