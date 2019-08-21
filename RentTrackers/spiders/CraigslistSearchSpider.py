@@ -1,9 +1,17 @@
 import os
 import scrapy
 
+from RentTrackers.items import Post
+
 
 class CraigslistSearchSpider(scrapy.Spider):
     name = "CraigslistSearch"
+
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "RentTrackers.pipelines.PostDeduplicationPipeline": 500
+        }
+    }
 
     def __init__(self):
         super().__init__()
@@ -27,11 +35,8 @@ class CraigslistSearchSpider(scrapy.Spider):
 
         results = response.css("li.result-row")
         for r in results:
-            url = r.css("a.result-title::attr(href)").extract_first()
-            post_id = int(r.css("li.result-row::attr(data-pid)").extract_first())
-            repost_id = r.css("li.result-row::attr(data-repost-of)").extract_first()
-            yield {
-                "post_id": post_id,
-                "repost_id": "" if repost_id is None else int(repost_id),
-                "url": url,
-            }
+            post = Post()
+            post["url"] = r.css("a.result-title::attr(href)").extract_first()
+            post["post_id"] = int(r.css("li.result-row::attr(data-pid)").extract_first())
+            post["repost_id"] = r.css("li.result-row::attr(data-repost-of)").extract_first()
+            yield post
