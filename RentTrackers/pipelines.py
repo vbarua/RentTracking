@@ -24,5 +24,4 @@ class PostDeduplicationPipeline(object):
         if self.post_id_cache.contains(post_id):
             raise DropItem("Post has already been scraped")
         else:
-            self.post_id_cache.add(post_id)
             return item

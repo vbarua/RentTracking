@@ -4,7 +4,7 @@ import os
 import scrapy
 from scrapy import signals
 
-from .utils import send_email
+from .utils import send_email, IdCache
 import RentTrackers.spiders.CraigslistParsingUtilities as CPU
 
 
@@ -29,6 +29,8 @@ class CraigslistListingSpider(scrapy.Spider):
         super().__init__()
         self.post_count = 0
         self.city = os.environ["CITY"]
+        post_id_cache_location = os.path.join("output", self.city, "cl_post_id_cache.txt")
+        self.post_id_cache = IdCache(post_id_cache_location)
         self.html_output_path = os.environ["CL_HTML_OUTPUT_LOCATION"]
         os.makedirs(self.html_output_path)
         self.crawl_set_location = os.environ["CL_CRAWL_SET_LOCATION"]
@@ -55,6 +57,8 @@ class CraigslistListingSpider(scrapy.Spider):
         Operations to perform once the spider terminates.
         """
         if not self.test_mode:
+            logging.info("Writing Post ID Cache")
+            self.post_id_cache.write_cache()
             logging.info("Send Scrape Email")
             send_email(self.city, self.post_count)
 
@@ -78,6 +82,7 @@ class CraigslistListingSpider(scrapy.Spider):
 
             logging.info("Starting Craigslist Crawl")
             for i in crawl_list:
+                post_id = i["post_id"]
                 url = i["url"]
                 yield scrapy.Request(
                     url=url,
@@ -114,4 +119,5 @@ class CraigslistListingSpider(scrapy.Spider):
         }
         base_results.update(results)
 
+        self.post_id_cache.add(post_id)
         yield base_results
