@@ -4,7 +4,7 @@ import os
 import scrapy
 from scrapy import signals
 
-from RentTrackers.utils import send_email, IdCache
+from RentTrackers.utils import IdCache
 import RentTrackers.spiders.CraigslistParsingUtilities as CPU
 
 
@@ -25,9 +25,14 @@ def get_samples() -> list:
 class CraigslistListingSpider(scrapy.Spider):
     name = "CraigslistListings"
 
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "RentTrackers.pipelines.EmailNotificationPipeline": 500
+        }
+    }
+
     def __init__(self):
         super().__init__()
-        self.post_count = 0
         self.city = os.environ["CITY"]
         post_id_cache_location = os.path.join("output", self.city, "cl_post_id_cache.txt")
         self.post_id_cache = IdCache(post_id_cache_location)
@@ -45,12 +50,8 @@ class CraigslistListingSpider(scrapy.Spider):
         Attaching the spider_closed method to the spider_closed signal.
         """
         spider = super(CraigslistListingSpider, cls).from_crawler(crawler, *args, **kwargs)
-        crawler.signals.connect(spider.item_scraped, signal=signals.item_scraped)
         crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
         return spider
-
-    def item_scraped(self, item, spider):
-        self.post_count += 1
 
     def spider_closed(self, spider):
         """
@@ -59,8 +60,6 @@ class CraigslistListingSpider(scrapy.Spider):
         if not self.test_mode:
             logging.info("Writing Post ID Cache")
             self.post_id_cache.write_cache()
-            logging.info("Send Scrape Email")
-            send_email(self.city, self.post_count)
 
     def start_requests(self):
         """

@@ -2,7 +2,7 @@ import logging
 import os
 from scrapy.exceptions import DropItem
 
-from RentTrackers.utils import IdCache
+from RentTrackers.utils import IdCache, send_email
 
 
 class PostDeduplicationPipeline(object):
@@ -25,3 +25,23 @@ class PostDeduplicationPipeline(object):
             raise DropItem("Post has already been scraped")
         else:
             return item
+
+
+class EmailNotificationPipeline(object):
+    """
+    Sends an email with the total item count on scrape completion.
+    """
+
+    def __init__(self):
+        self.city = os.environ["CITY"]
+        self.counter = 0
+
+    def close_spider(self, spider):
+        logging.info("Closing Email Notification Pipeline")
+        if not os.environ.get("TEST"):
+            logging.info("Send Scrape Email")
+            send_email(self.city, self.counter)
+
+    def process_item(self, item, spider):
+        self.counter += 1
+        return item
