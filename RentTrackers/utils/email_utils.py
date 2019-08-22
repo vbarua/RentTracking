@@ -13,8 +13,8 @@ def send_email(city, count):
         message = Mail(
                     from_email=from_email,
                     to_emails=to_email,
-                    subject='Craigslist Scraper: {0} - {1}'.format(city, count),
-                    html_content='<strong>Have a good day</strong>zs'
+                    subject='{0} - {1}'.format(city, count),
+                    html_content='Have a good day.'
                 )
         sg.send(message)
 
