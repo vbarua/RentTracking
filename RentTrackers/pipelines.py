@@ -2,7 +2,7 @@ import logging
 import os
 from scrapy.exceptions import DropItem
 
-from RentTrackers.spiders.utils import IdCache
+from RentTrackers.utils import IdCache
 
 
 class PostDeduplicationPipeline(object):

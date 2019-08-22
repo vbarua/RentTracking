@@ -4,7 +4,7 @@ import os
 import scrapy
 from scrapy import signals
 
-from .utils import send_email, IdCache
+from RentTrackers.utils import send_email, IdCache
 import RentTrackers.spiders.CraigslistParsingUtilities as CPU
 
 
