@@ -38,7 +38,7 @@ class EmailNotificationPipeline(object):
 
     def close_spider(self, spider):
         logging.info("Closing Email Notification Pipeline")
-        if not os.environ.get("TEST"):
+        if not os.environ.get("TEST") and self.city is "vancouver":
             logging.info("Send Scrape Email")
             send_email(self.city, self.counter)
 
