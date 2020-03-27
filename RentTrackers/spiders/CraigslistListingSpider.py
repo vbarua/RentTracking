@@ -27,7 +27,7 @@ class CraigslistListingSpider(scrapy.Spider):
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "RentTrackers.pipelines.EmailNotificationPipeline": 500
+            "RentTrackers.pipelines.SlackNotificationPipeline": 500
         }
     }
 
