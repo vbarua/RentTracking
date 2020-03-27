@@ -37,7 +37,7 @@ sendgrid==6.0.5
 service-identity==17.0.0
 six==1.11.0
 traitlets==4.3.2
-Twisted==18.7.0
+Twisted==19.7.0
 urllib3==1.25.8
 w3lib==1.19.0
 wcwidth==0.1.7
