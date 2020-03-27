@@ -16,7 +16,7 @@ class CraigslistSearchSpider(scrapy.Spider):
     def __init__(self):
         super().__init__()
         self.city = os.environ["CITY"]
-        self.base_search_url = "https://" + self.city + ".craigslist.ca/search/apa?sort=date&"
+        self.base_search_url = "https://" + self.city + ".craigslist.org/search/apa?sort=date&"
 
     def start_requests(self):
         url = self.base_search_url
