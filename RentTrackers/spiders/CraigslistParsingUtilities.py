@@ -52,9 +52,9 @@ def extract_price(response) -> dict:
     :param response: a scrapy.http.response.Response
     :return: dict containing a price field if present.
     """
-    price = response.css('span.price::text').extract_first()
-    if price:
-        price = int(price[1:])
+    price_str = response.css('span.price::text').extract_first()
+    if price_str:
+        price = int("".join(filter(lambda c: c.isnumeric(), price_str)))
         return {"price": price}
     else:
         return {}
