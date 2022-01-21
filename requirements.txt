@@ -12,7 +12,7 @@ decorator==4.4.0
 hyperlink==18.0.0
 idna==2.7
 incremental==17.5.0
-ipython==7.7.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.15.1
 lxml==4.2.5
